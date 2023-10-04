@@ -3,6 +3,10 @@ import { useState } from "react";
 export default function App() {
   const [items, setItems] = useState([]);
 
+  const numItems = items.length;
+  const packedItems = items.filter((item) => item.packed).length;
+  const packedPercentage = (packedItems / numItems) * 100 || 0;
+
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
   }
@@ -11,12 +15,28 @@ export default function App() {
     setItems((items) => items.filter((item) => item.id !== id));
   }
 
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PackingList items={items} onDeleteItems={handleDeleteItems} />
-      <Stats />
+      <PackingList
+        items={items}
+        onDeleteItems={handleDeleteItems}
+        onToggleItems={handleToggleItem}
+      />
+      <Stats
+        numItems={numItems}
+        packedItems={packedItems}
+        packedPercentage={packedPercentage}
+      />
     </div>
   );
 }
@@ -63,21 +83,31 @@ function Form({ onAddItems }) {
   );
 }
 
-function PackingList({ items, onDeleteItems }) {
+function PackingList({ items, onDeleteItems, onToggleItems }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} key={item.id} onDeleteItems={onDeleteItems} />
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItems={onDeleteItems}
+            onToggleItems={onToggleItems}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, onDeleteItems }) {
+function Item({ item, onDeleteItems, onToggleItems }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onToggleItems(item.id)}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
@@ -86,10 +116,13 @@ function Item({ item, onDeleteItems }) {
   );
 }
 
-function Stats() {
+function Stats({ numItems, packedItems, packedPercentage }) {
   return (
     <footer className="stats">
-      <em>💼You have X items on your list, and you already packed X (X%)</em>
+      <em>
+        💼You have {numItems} items on your list, and you already packed{" "}
+        {packedItems} ({packedPercentage}%)
+      </em>
     </footer>
   );
 }
