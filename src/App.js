@@ -5,7 +5,7 @@ export default function App() {
 
   const numItems = items.length;
   const packedItems = items.filter((item) => item.packed).length;
-  const packedPercentage = (packedItems / numItems) * 100 || 0;
+  const packedPercentage = Math.round((packedItems / numItems) * 100) || 0;
 
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
@@ -117,11 +117,20 @@ function Item({ item, onDeleteItems, onToggleItems }) {
 }
 
 function Stats({ numItems, packedItems, packedPercentage }) {
+  if (!numItems)
+    return (
+      <p className="stats">
+        <em>Start adding some items to your packing list.</em>
+      </p>
+    );
+    
   return (
     <footer className="stats">
       <em>
-        💼You have {numItems} items on your list, and you already packed{" "}
-        {packedItems} ({packedPercentage}%)
+        {packedPercentage === 100
+          ? "You have everything. You are ready to go."
+          : `💼You have ${numItems} items on your list, and you already packed
+        ${packedItems} (${packedPercentage}%).`}
       </em>
     </footer>
   );
